@@ -227,10 +227,19 @@ class AI_Outline_Generator {
             return false;
         }
 
-        // Validate API key format
-        if (!preg_match('/^sk-[a-zA-Z0-9]{48}$/', $api_key)) {
-            error_log('AI Outline Generator - Error: Invalid API key format');
-            return false;
+        // Validate API key format based on provider
+        if ($api_provider === 'openai') {
+            if (!preg_match('/^sk-[a-zA-Z0-9]{48}$/', $api_key)) {
+                error_log('AI Outline Generator - Error: Invalid OpenAI API key format');
+                set_transient('ai_outline_generator_last_error', 'Invalid OpenAI API key format. Should start with "sk-" and be 51 characters long.', 300);
+                return false;
+            }
+        } elseif ($api_provider === 'anthropic') {
+            if (!preg_match('/^sk-ant-[a-zA-Z0-9\-_]{95,}$/', $api_key)) {
+                error_log('AI Outline Generator - Error: Invalid Anthropic API key format');
+                set_transient('ai_outline_generator_last_error', 'Invalid Claude API key format. Should start with "sk-ant-".', 300);
+                return false;
+            }
         }
 
         // Create prompt
@@ -240,6 +249,8 @@ class AI_Outline_Generator {
         switch ($api_provider) {
             case 'openai':
                 return $this->call_openai_api($prompt, $api_key);
+            case 'anthropic':
+                return $this->call_anthropic_api($prompt, $api_key);
             default:
                 error_log('AI Outline Generator - Error: Unsupported API provider: ' . $api_provider);
                 return false;
@@ -353,6 +364,99 @@ class AI_Outline_Generator {
         } else {
             $error_message = 'Unexpected response format from OpenAI API';
             error_log('AI Outline Generator - Unexpected Response: ' . print_r($data, true));
+            set_transient('ai_outline_generator_last_error', $error_message, 300);
+        }
+
+        return false;
+    }
+
+    /**
+     * Call Anthropic (Claude) API
+     */
+    private function call_anthropic_api($prompt, $api_key) {
+        $url = 'https://api.anthropic.com/v1/messages';
+
+        $data = array(
+            'model' => 'claude-3-haiku-20240307',
+            'max_tokens' => 1500,
+            'messages' => array(
+                array(
+                    'role' => 'user',
+                    'content' => $prompt
+                )
+            )
+        );
+
+        $args = array(
+            'headers' => array(
+                'x-api-key' => $api_key,
+                'Content-Type' => 'application/json',
+                'anthropic-version' => '2023-06-01'
+            ),
+            'body' => json_encode($data),
+            'timeout' => 60
+        );
+
+        $response = wp_remote_post($url, $args);
+
+        if (is_wp_error($response)) {
+            $error_message = 'Network error: ' . $response->get_error_message();
+            error_log('AI Outline Generator - Anthropic API Error: ' . $error_message);
+            set_transient('ai_outline_generator_last_error', $error_message, 300);
+            return false;
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+
+        if ($response_code !== 200) {
+            $error_message = 'Anthropic API Error (Code: ' . $response_code . ')';
+
+            // Try to get more specific error from response body
+            $error_data = json_decode($body, true);
+            if (isset($error_data['error']['message'])) {
+                $error_message = $error_data['error']['message'];
+
+                // Provide user-friendly error messages
+                if (strpos($error_message, 'invalid_api_key') !== false || strpos($error_message, 'authentication') !== false) {
+                    $error_message = 'Invalid Claude API key. Please check your Anthropic API key in settings.';
+                } elseif (strpos($error_message, 'insufficient_quota') !== false || strpos($error_message, 'billing') !== false) {
+                    $error_message = 'Insufficient API credits. Please check your Anthropic account billing.';
+                } elseif (strpos($error_message, 'rate_limit') !== false) {
+                    $error_message = 'Rate limit exceeded. Please try again in a few moments.';
+                }
+            }
+
+            error_log('AI Outline Generator - Anthropic API Response Code: ' . $response_code . ' - ' . $error_message);
+            set_transient('ai_outline_generator_last_error', $error_message, 300);
+            return false;
+        }
+
+        $data = json_decode($body, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $error_message = 'Invalid response format: ' . json_last_error_msg();
+            error_log('AI Outline Generator - Anthropic JSON Decode Error: ' . $error_message);
+            set_transient('ai_outline_generator_last_error', $error_message, 300);
+            return false;
+        }
+
+        if (isset($data['content'][0]['text'])) {
+            $content = $data['content'][0]['text'];
+
+            // Log the generation for analytics (optional)
+            $this->log_generation($prompt, $content);
+
+            return $content;
+        }
+
+        if (isset($data['error'])) {
+            $error_message = $data['error']['message'];
+            error_log('AI Outline Generator - Anthropic Error: ' . $error_message);
+            set_transient('ai_outline_generator_last_error', $error_message, 300);
+        } else {
+            $error_message = 'Unexpected response format from Anthropic API';
+            error_log('AI Outline Generator - Unexpected Anthropic Response: ' . print_r($data, true));
             set_transient('ai_outline_generator_last_error', $error_message, 300);
         }
 

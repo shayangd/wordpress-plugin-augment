@@ -34,8 +34,11 @@ if (!defined('ABSPATH')) {
                     <p class="description">
                         <?php _e('Enter your AI provider API key. This is required for the plugin to work.', 'ai-outline-generator'); ?>
                         <br>
-                        <strong><?php _e('OpenAI:', 'ai-outline-generator'); ?></strong> 
+                        <strong><?php _e('OpenAI:', 'ai-outline-generator'); ?></strong>
                         <a href="https://platform.openai.com/api-keys" target="_blank"><?php _e('Get your API key here', 'ai-outline-generator'); ?></a>
+                        <br>
+                        <strong><?php _e('Claude (Anthropic):', 'ai-outline-generator'); ?></strong>
+                        <a href="https://console.anthropic.com/account/keys" target="_blank"><?php _e('Get your API key here', 'ai-outline-generator'); ?></a>
                     </p>
                 </td>
             </tr>
