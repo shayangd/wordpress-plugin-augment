@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Outline Generator - WordPress Plugin Demo</title>
+    
+    <!-- Import Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600&display=swap" rel="stylesheet">
+    
+    <!-- Include the plugin CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #7756B1 0%, #9c88ff 100%);
+            color: white;
+            border-radius: 12px;
+        }
+        
+        .demo-header h1 {
+            margin: 0 0 16px 0;
+            font-size: 36px;
+            font-weight: 700;
+        }
+        
+        .demo-header p {
+            margin: 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .demo-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 30px;
+            color: #856404;
+        }
+        
+        .demo-note strong {
+            color: #7756B1;
+        }
+        
+        .plugin-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .mock-api-response {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #7756B1;
+        }
+        
+        .mock-api-response h3 {
+            margin: 0 0 16px 0;
+            color: #7756B1;
+        }
+        
+        .mock-outline {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #e5e5e5;
+        }
+        
+        .mock-outline h2 {
+            color: #7756B1;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+        
+        .mock-outline h3 {
+            color: #333;
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .mock-outline p {
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .mock-outline ul {
+            margin-left: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .mock-outline li {
+            color: #666;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <h1>🚀 AI Outline Generator Plugin Demo</h1>
+        <p>WordPress Plugin with Figma Design Implementation</p>
+    </div>
+    
+    <div class="demo-note">
+        <strong>Demo Mode:</strong> This is a static demonstration of the AI Outline Generator WordPress plugin. 
+        In a real WordPress environment, this would be displayed using the shortcode <code>[ai_outline_generator]</code> 
+        and would connect to OpenAI's API for actual outline generation.
+    </div>
+    
+    <div class="plugin-container">
+        <!-- This is the actual plugin content -->
+        <div class="ai-outline-generator-container">
+            <!-- Hero Section -->
+            <div class="ai-outline-hero">
+                <div class="ai-outline-badge-group">
+                    <div class="ai-outline-badge">
+                        <span class="badge-text">AI Outline Generator</span>
+                    </div>
+                    <div class="ai-outline-message">
+                        Turn Thoughts Into Text, Effortlessly.
+                    </div>
+                </div>
+                
+                <h1 class="ai-outline-title">
+                    Free AI Outline Generator
+                </h1>
+                
+                <p class="ai-outline-description">
+                    Jumpstart your writing with structured, ready-to-go outlines. Whether it's a blog post, essay, article, or video script — our AI helps you organize ideas fast, so you can focus on creating, not stressing.
+                </p>
+            </div>
+            
+            <!-- Main Form Section -->
+            <div class="ai-outline-form-container">
+                <form id="ai-outline-form" class="ai-outline-form">
+                    <div class="form-header">
+                        <h2>Create Your Outline</h2>
+                    </div>
+                    
+                    <div class="form-content">
+                        <!-- Text Input Area -->
+                        <div class="input-group">
+                            <textarea 
+                                id="outline-content" 
+                                name="content" 
+                                placeholder="Describe your topic or paste your content here..."
+                                maxlength="1000"
+                                required
+                            >How to create effective content marketing strategies that drive engagement and conversions</textarea>
+                            <div class="char-counter">
+                                <span id="char-count">89</span>/<span id="char-limit">1000</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Controls -->
+                        <div class="form-controls">
+                            <div class="control-group">
+                                <label for="content-type">Outline/Content Type</label>
+                                <select id="content-type" name="content_type" required>
+                                    <option value="research-paper">Research Paper</option>
+                                    <option value="blog-post" selected>Blog Post</option>
+                                    <option value="essay">Essay</option>
+                                    <option value="article">Article</option>
+                                    <option value="video-script">Video Script</option>
+                                    <option value="presentation">Presentation</option>
+                                    <option value="book-chapter">Book Chapter</option>
+                                </select>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label for="sections">Outline Sections</label>
+                                <select id="sections" name="sections" required>
+                                    <option value="3">3 Sections</option>
+                                    <option value="4">4 Sections</option>
+                                    <option value="5" selected>5 Sections</option>
+                                    <option value="6">6 Sections</option>
+                                    <option value="7">7 Sections</option>
+                                </select>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label for="language">Language</label>
+                                <select id="language" name="language" required>
+                                    <option value="English" selected>English</option>
+                                    <option value="Spanish">Spanish</option>
+                                    <option value="French">French</option>
+                                    <option value="German">German</option>
+                                    <option value="Italian">Italian</option>
+                                    <option value="Portuguese">Portuguese</option>
+                                    <option value="Chinese">Chinese</option>
+                                    <option value="Japanese">Japanese</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Generate Button -->
+                        <div class="button-container">
+                            <button type="submit" id="generate-btn" class="generate-button">
+                                <svg class="button-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                    <path d="M8 1V15M1 8H15" stroke="currentColor" stroke-width="1.17" stroke-linecap="round"/>
+                                </svg>
+                                <span class="button-text">Generate Outline</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Mock API Response -->
+                <div id="mock-response" class="mock-api-response">
+                    <h3>✨ Generated Outline (Demo)</h3>
+                    <div class="mock-outline">
+                        <h1>Effective Content Marketing Strategies That Drive Engagement and Conversions</h1>
+                        
+                        <h2>1. Understanding Your Target Audience</h2>
+                        <h3>Defining Your Ideal Customer</h3>
+                        <p>Create detailed buyer personas based on demographics, psychographics, and behavioral data.</p>
+                        <ul>
+                            <li>Conduct surveys and interviews with existing customers</li>
+                            <li>Analyze website analytics and social media insights</li>
+                            <li>Research competitor audiences and market trends</li>
+                        </ul>
+                        
+                        <h3>Content Preferences and Consumption Habits</h3>
+                        <p>Understand how, when, and where your audience consumes content.</p>
+                        
+                        <h2>2. Setting Clear Content Marketing Goals</h2>
+                        <h3>SMART Goal Framework</h3>
+                        <p>Establish specific, measurable, achievable, relevant, and time-bound objectives.</p>
+                        
+                        <h3>Key Performance Indicators (KPIs)</h3>
+                        <p>Define metrics that align with your business objectives and content goals.</p>
+                        
+                        <h2>3. Content Planning and Strategy Development</h2>
+                        <h3>Content Audit and Gap Analysis</h3>
+                        <p>Evaluate existing content performance and identify opportunities for improvement.</p>
+                        
+                        <h3>Editorial Calendar Creation</h3>
+                        <p>Plan content themes, topics, and publishing schedules for consistent delivery.</p>
+                        
+                        <h2>4. Creating High-Quality, Engaging Content</h2>
+                        <h3>Storytelling Techniques</h3>
+                        <p>Use narrative elements to make content more compelling and memorable.</p>
+                        
+                        <h3>Visual Content Integration</h3>
+                        <p>Incorporate images, videos, infographics, and interactive elements to enhance engagement.</p>
+                        
+                        <h2>5. Distribution and Promotion Strategies</h2>
+                        <h3>Multi-Channel Approach</h3>
+                        <p>Leverage various platforms and channels to maximize content reach and impact.</p>
+                        
+                        <h3>Influencer and Partnership Collaborations</h3>
+                        <p>Build relationships with industry influencers and complementary brands for content amplification.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sample Content Cards -->
+            <div class="ai-outline-samples">
+                <div class="sample-card">
+                    <h3>How to Humanize AI-Generated Text</h3>
+                    <div class="sample-content">
+                        <p>AI can be a great tool for generating content, but the text it produces can sometimes sound robotic. Here's a step-by-step guide to humanizing AI-generated text, making it sound more natural and engaging for your readers:</p>
+                        <div class="sample-steps">
+                            <div class="step">Step 1. Talk Like a Human:</div>
+                            <div class="step">Step 2. Show, Don't Tell:</div>
+                            <div class="step">Step 3. Rewrite passive voice to Active voice:</div>
+                            <div class="step">Step 4. Fact-Check for Accuracy</div>
+                            <div class="step">Step 5. Don't Forget to Add Visuals</div>
+                            <div class="step">Step 6. Take the Help of AI tools</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sample-card">
+                    <h3>Content Marketing Strategy Guide</h3>
+                    <div class="sample-content">
+                        <p>Build a comprehensive content marketing strategy that drives engagement and converts visitors into customers with this structured approach:</p>
+                        <div class="sample-steps">
+                            <div class="step">Step 1. Define Your Target Audience</div>
+                            <div class="step">Step 2. Set Clear Content Goals</div>
+                            <div class="step">Step 3. Choose Content Types and Formats</div>
+                            <div class="step">Step 4. Create a Content Calendar</div>
+                            <div class="step">Step 5. Optimize for SEO</div>
+                            <div class="step">Step 6. Measure and Analyze Performance</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sample-card">
+                    <h3>Effective Email Marketing Campaigns</h3>
+                    <div class="sample-content">
+                        <p>Create email marketing campaigns that engage subscribers and drive conversions with these proven strategies and best practices:</p>
+                        <div class="sample-steps">
+                            <div class="step">Step 1. Build a Quality Email List</div>
+                            <div class="step">Step 2. Craft Compelling Subject Lines</div>
+                            <div class="step">Step 3. Design Mobile-Friendly Templates</div>
+                            <div class="step">Step 4. Personalize Your Messages</div>
+                            <div class="step">Step 5. Test and Optimize</div>
+                            <div class="step">Step 6. Track Key Metrics</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Demo functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('ai-outline-form');
+            const generateBtn = document.getElementById('generate-btn');
+            const mockResponse = document.getElementById('mock-response');
+            const textarea = document.getElementById('outline-content');
+            const charCount = document.getElementById('char-count');
+            
+            // Character counter
+            textarea.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
+            });
+            
+            // Form submission demo
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show loading state
+                generateBtn.disabled = true;
+                generateBtn.querySelector('.button-text').textContent = 'Generating outline...';
+                
+                // Simulate API call
+                setTimeout(function() {
+                    // Show mock response
+                    mockResponse.style.display = 'block';
+                    mockResponse.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    // Reset button
+                    generateBtn.disabled = false;
+                    generateBtn.querySelector('.button-text').textContent = 'Generate Outline';
+                    
+                    // Show success notification
+                    showNotification('Outline generated successfully! (Demo Mode)', 'success');
+                }, 2000);
+            });
+            
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 12px 20px;
+                    background: ${type === 'success' ? '#10b981' : '#ef4444'};
+                    color: white;
+                    border-radius: 6px;
+                    font-family: 'Inter', sans-serif;
+                    font-size: 14px;
+                    font-weight: 500;
+                    z-index: 10000;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    animation: slideInRight 0.3s ease;
+                `;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 5000);
+            }
+        });
+    </script>
+    
+    <style>
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</body>
+</html>
