@@ -1,6 +1,9 @@
 # wordpress-plugin-augment
 wordpress plugin using augment code
 
+
+## How to run project
+
 1. Figma API key (personal access token), Account Settings> Security Tab> Generate a Personal Access Token. (You can only copy once)
 2. Install node in mac to run mcp server
 ```
@@ -35,5 +38,13 @@ https://www.figma.com/design/0ldaPxf1GO3APTPP1qrCMn/Wellows---AAAI-Design?node-i
 3. create an empty wordpress site and use this plugin
 ```
 
+# How to run wordpress plugin
+
+1. run ```docker compose up --build```
+2. From Docker Desktop, goto ai-outline-wordpress (http://localhost:8080/), install wordpress
+3. http://localhost:8080/wp-admin/ Side Menu > Plugins > Activate AI Outline Generator
+4. Side Menu > Settings > AI Outline Generator > Add Open AI Key
+5. Side Menu > Pages > Edit Page > Add [ai_outline_generator]
+6. View Page (http://localhost:8080/)
 
 
