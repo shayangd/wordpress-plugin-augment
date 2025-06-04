@@ -166,24 +166,45 @@ class AI_Outline_Generator {
         if (!wp_verify_nonce($_POST['nonce'], 'ai_outline_nonce')) {
             wp_die(__('Security check failed', 'ai-outline-generator'));
         }
-        
+
         $content = sanitize_textarea_field($_POST['content']);
         $content_type = sanitize_text_field($_POST['content_type']);
         $sections = intval($_POST['sections']);
         $language = sanitize_text_field($_POST['language']);
-        
+
         // Validate input
-        if (empty($content) || strlen($content) > 1000) {
-            wp_send_json_error(__('Invalid content length', 'ai-outline-generator'));
+        if (empty($content)) {
+            wp_send_json_error(__('Please enter some content to generate an outline.', 'ai-outline-generator'));
         }
-        
+
+        if (strlen($content) > 1000) {
+            wp_send_json_error(__('Content is too long. Please limit to 1000 characters.', 'ai-outline-generator'));
+        }
+
+        if (strlen($content) < 10) {
+            wp_send_json_error(__('Content is too short. Please provide at least 10 characters.', 'ai-outline-generator'));
+        }
+
+        // Check if API key is configured
+        $api_key = get_option('ai_outline_generator_api_key');
+        if (empty($api_key)) {
+            wp_send_json_error(__('OpenAI API key not configured. Please go to Settings → AI Outline Generator to add your API key.', 'ai-outline-generator'));
+        }
+
         // Generate outline using AI
         $outline = $this->generate_ai_outline($content, $content_type, $sections, $language);
-        
+
         if ($outline) {
             wp_send_json_success(array('outline' => $outline));
         } else {
-            wp_send_json_error(__('Failed to generate outline', 'ai-outline-generator'));
+            // Check for specific error reasons
+            $last_error = get_transient('ai_outline_generator_last_error');
+            if ($last_error) {
+                delete_transient('ai_outline_generator_last_error');
+                wp_send_json_error($last_error);
+            } else {
+                wp_send_json_error(__('Failed to generate outline. Please check your API key and try again.', 'ai-outline-generator'));
+            }
         }
     }
     
@@ -193,19 +214,34 @@ class AI_Outline_Generator {
     private function generate_ai_outline($content, $content_type, $sections, $language) {
         $api_key = get_option('ai_outline_generator_api_key');
         $api_provider = get_option('ai_outline_generator_api_provider', 'openai');
-        
+
+        // Debug logging
+        error_log('AI Outline Generator - Debug Info:');
+        error_log('API Key exists: ' . (!empty($api_key) ? 'Yes' : 'No'));
+        error_log('API Key length: ' . strlen($api_key));
+        error_log('API Provider: ' . $api_provider);
+        error_log('Content length: ' . strlen($content));
+
         if (empty($api_key)) {
+            error_log('AI Outline Generator - Error: No API key configured');
             return false;
         }
-        
+
+        // Validate API key format
+        if (!preg_match('/^sk-[a-zA-Z0-9]{48}$/', $api_key)) {
+            error_log('AI Outline Generator - Error: Invalid API key format');
+            return false;
+        }
+
         // Create prompt
         $prompt = $this->create_prompt($content, $content_type, $sections, $language);
-        
+
         // Call AI API based on provider
         switch ($api_provider) {
             case 'openai':
                 return $this->call_openai_api($prompt, $api_key);
             default:
+                error_log('AI Outline Generator - Error: Unsupported API provider: ' . $api_provider);
                 return false;
         }
     }
@@ -260,21 +296,44 @@ class AI_Outline_Generator {
         $response = wp_remote_post($url, $args);
 
         if (is_wp_error($response)) {
-            error_log('AI Outline Generator - API Error: ' . $response->get_error_message());
+            $error_message = 'Network error: ' . $response->get_error_message();
+            error_log('AI Outline Generator - API Error: ' . $error_message);
+            set_transient('ai_outline_generator_last_error', $error_message, 300);
             return false;
         }
 
         $response_code = wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+
         if ($response_code !== 200) {
-            error_log('AI Outline Generator - API Response Code: ' . $response_code);
+            $error_message = 'API Error (Code: ' . $response_code . ')';
+
+            // Try to get more specific error from response body
+            $error_data = json_decode($body, true);
+            if (isset($error_data['error']['message'])) {
+                $error_message = $error_data['error']['message'];
+
+                // Provide user-friendly error messages
+                if (strpos($error_message, 'invalid_api_key') !== false) {
+                    $error_message = 'Invalid API key. Please check your OpenAI API key in settings.';
+                } elseif (strpos($error_message, 'insufficient_quota') !== false) {
+                    $error_message = 'Insufficient API credits. Please check your OpenAI account billing.';
+                } elseif (strpos($error_message, 'rate_limit') !== false) {
+                    $error_message = 'Rate limit exceeded. Please try again in a few moments.';
+                }
+            }
+
+            error_log('AI Outline Generator - API Response Code: ' . $response_code . ' - ' . $error_message);
+            set_transient('ai_outline_generator_last_error', $error_message, 300);
             return false;
         }
 
-        $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            error_log('AI Outline Generator - JSON Decode Error: ' . json_last_error_msg());
+            $error_message = 'Invalid response format: ' . json_last_error_msg();
+            error_log('AI Outline Generator - JSON Decode Error: ' . $error_message);
+            set_transient('ai_outline_generator_last_error', $error_message, 300);
             return false;
         }
 
@@ -288,7 +347,13 @@ class AI_Outline_Generator {
         }
 
         if (isset($data['error'])) {
-            error_log('AI Outline Generator - OpenAI Error: ' . $data['error']['message']);
+            $error_message = $data['error']['message'];
+            error_log('AI Outline Generator - OpenAI Error: ' . $error_message);
+            set_transient('ai_outline_generator_last_error', $error_message, 300);
+        } else {
+            $error_message = 'Unexpected response format from OpenAI API';
+            error_log('AI Outline Generator - Unexpected Response: ' . print_r($data, true));
+            set_transient('ai_outline_generator_last_error', $error_message, 300);
         }
 
         return false;
