@@ -1,0 +1,135 @@
+/* AI Outline Generator Admin Styles */
+
+.ai-outline-admin-container {
+    max-width: 800px;
+    margin: 20px 0;
+}
+
+.ai-outline-instructions {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+    margin-top: 20px;
+    border-left: 4px solid #7756B1;
+}
+
+.ai-outline-instructions h3 {
+    color: #7756B1;
+    margin-top: 0;
+    font-size: 18px;
+}
+
+.ai-outline-instructions h4 {
+    color: #333;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.ai-outline-instructions code {
+    background: #fff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    border: 1px solid #ddd;
+    color: #7756B1;
+    font-weight: 600;
+}
+
+.ai-outline-instructions ul {
+    margin-left: 20px;
+}
+
+.ai-outline-instructions li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.ai-outline-instructions p {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/* Form styling improvements */
+.form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+    vertical-align: top;
+}
+
+.form-table td {
+    padding: 15px 10px;
+}
+
+.form-table input[type="password"],
+.form-table select {
+    width: 400px;
+    max-width: 100%;
+}
+
+.form-table .description {
+    margin-top: 8px;
+    font-style: italic;
+    color: #666;
+}
+
+.form-table .description strong {
+    color: #333;
+    font-style: normal;
+}
+
+.form-table .description a {
+    color: #7756B1;
+    text-decoration: none;
+}
+
+.form-table .description a:hover {
+    text-decoration: underline;
+}
+
+/* Success notice styling */
+.notice.notice-success {
+    border-left-color: #7756B1;
+}
+
+/* Submit button styling */
+.submit .button-primary {
+    background: #7756B1;
+    border-color: #6b46a3;
+    text-shadow: none;
+    box-shadow: 0 1px 0 #6b46a3;
+}
+
+.submit .button-primary:hover {
+    background: #6b46a3;
+    border-color: #5a3a8a;
+}
+
+.submit .button-primary:active {
+    background: #5a3a8a;
+    border-color: #4c2d75;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .form-table th,
+    .form-table td {
+        display: block;
+        width: 100%;
+        padding: 10px 0;
+    }
+    
+    .form-table th {
+        border-bottom: none;
+        padding-bottom: 5px;
+    }
+    
+    .form-table input[type="password"],
+    .form-table select {
+        width: 100%;
+    }
+    
+    .ai-outline-instructions {
+        padding: 15px;
+    }
+}
