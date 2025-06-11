@@ -47,4 +47,8 @@ https://www.figma.com/design/0ldaPxf1GO3APTPP1qrCMn/Wellows---AAAI-Design?node-i
 5. Side Menu > Pages > Edit Page > Add [ai_outline_generator]
 6. View Page (http://localhost:8080/)
 
+# Output
+
+![output-augment](!/output-augment.png)
+
 
