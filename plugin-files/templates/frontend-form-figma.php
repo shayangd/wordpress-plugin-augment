@@ -236,3 +236,181 @@ $show_creative_potions = isset($atts['show_creative_potions']) ? $atts['show_cre
                 </div>
             </div>
         </div>
+
+        <!-- Creative Potions Section - Figma Design -->
+        <?php if ($show_creative_potions): ?>
+        <div class="aaai-creative-potions">
+            <div class="aaai-potions-frame">
+                <h2 class="aaai-potions-title"><?php _e('Pick your creative potion', 'aaai-ai-writing-tool'); ?></h2>
+                <div class="aaai-potions-grid">
+                    <!-- Blog Post Card -->
+                    <div class="aaai-potion-card" data-type="blog_post">
+                        <div class="aaai-card-frame">
+                            <div class="aaai-card-content">
+                                <div class="aaai-potion-icon">
+                                    <img src="data:image/svg+xml;base64,..." alt="Blog Post" width="32" height="30" />
+                                </div>
+                                <div class="aaai-potion-title"><?php _e('Blog Post', 'aaai-ai-writing-tool'); ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ad Card -->
+                    <div class="aaai-potion-card" data-type="ad">
+                        <div class="aaai-card-frame">
+                            <div class="aaai-card-content">
+                                <div class="aaai-potion-icon">
+                                    <img src="data:image/svg+xml;base64,..." alt="Ad" width="35" height="35" />
+                                </div>
+                                <div class="aaai-potion-title"><?php _e('Ad', 'aaai-ai-writing-tool'); ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social Media Post Card -->
+                    <div class="aaai-potion-card" data-type="social_media_post">
+                        <div class="aaai-card-frame">
+                            <div class="aaai-card-content">
+                                <div class="aaai-potion-icon">
+                                    <img src="data:image/svg+xml;base64,..." alt="Social Media" width="30" height="30" />
+                                </div>
+                                <div class="aaai-potion-title"><?php _e('Social Media Post', 'aaai-ai-writing-tool'); ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paragraph Card -->
+                    <div class="aaai-potion-card" data-type="paragraph">
+                        <div class="aaai-card-frame">
+                            <div class="aaai-card-content">
+                                <div class="aaai-potion-icon">
+                                    <img src="data:image/svg+xml;base64,..." alt="Paragraph" width="28" height="28" />
+                                </div>
+                                <div class="aaai-potion-title"><?php _e('Paragraph', 'aaai-ai-writing-tool'); ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Card -->
+                    <div class="aaai-potion-card" data-type="email">
+                        <div class="aaai-card-frame">
+                            <div class="aaai-card-content">
+                                <div class="aaai-potion-icon">
+                                    <img src="data:image/svg+xml;base64,..." alt="Email" width="30" height="28" />
+                                </div>
+                                <div class="aaai-potion-title"><?php _e('Email', 'aaai-ai-writing-tool'); ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Blog Introduction Card -->
+                    <div class="aaai-potion-card" data-type="blog_introduction">
+                        <div class="aaai-card-frame">
+                            <div class="aaai-card-content">
+                                <div class="aaai-potion-icon">
+                                    <img src="data:image/svg+xml;base64,..." alt="Blog Introduction" width="30" height="28" />
+                                </div>
+                                <div class="aaai-potion-title"><?php _e('Blog Introduction', 'aaai-ai-writing-tool'); ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Blog Outline Card -->
+                    <div class="aaai-potion-card" data-type="blog_outline">
+                        <div class="aaai-card-frame">
+                            <div class="aaai-card-content">
+                                <div class="aaai-potion-icon">
+                                    <img src="data:image/svg+xml;base64,..." alt="Blog Outline" width="30" height="28" />
+                                </div>
+                                <div class="aaai-potion-title"><?php _e('Blog Outline', 'aaai-ai-writing-tool'); ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product Description Card -->
+                    <div class="aaai-potion-card" data-type="product_description">
+                        <div class="aaai-card-frame">
+                            <div class="aaai-card-content">
+                                <div class="aaai-potion-icon">
+                                    <img src="data:image/svg+xml;base64,..." alt="Product Description" width="30" height="28" />
+                                </div>
+                                <div class="aaai-potion-title"><?php _e('Product Description', 'aaai-ai-writing-tool'); ?></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Results Section -->
+        <div id="aaai-results-section" class="aaai-results-section" style="display: none;">
+            <div class="aaai-results-container">
+                <div class="aaai-results-header">
+                    <h3 class="aaai-results-title"><?php _e('Generated Content', 'aaai-ai-writing-tool'); ?></h3>
+                    <div class="aaai-results-actions">
+                        <button type="button" class="aaai-copy-button" onclick="copyToClipboard()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <?php _e('Copy', 'aaai-ai-writing-tool'); ?>
+                        </button>
+                        <button type="button" class="aaai-feedback-button" onclick="showFeedbackModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <?php _e('Feedback', 'aaai-ai-writing-tool'); ?>
+                        </button>
+                    </div>
+                </div>
+                <div class="aaai-results-content">
+                    <div id="aaai-generated-content" class="aaai-generated-content">
+                        <!-- Generated content will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Modal -->
+        <div id="aaai-feedback-modal" class="aaai-feedback-modal" style="display: none;">
+            <div class="aaai-modal-overlay" onclick="hideFeedbackModal()"></div>
+            <div class="aaai-modal-content">
+                <div class="aaai-modal-header">
+                    <h3><?php _e('How was your experience?', 'aaai-ai-writing-tool'); ?></h3>
+                    <button type="button" class="aaai-modal-close" onclick="hideFeedbackModal()">×</button>
+                </div>
+                <div class="aaai-modal-body">
+                    <div class="aaai-emotion-section">
+                        <p><?php _e('How did this make you feel?', 'aaai-ai-writing-tool'); ?></p>
+                        <div class="aaai-emotion-buttons">
+                            <button type="button" class="aaai-emotion-button" data-emotion="happy">😊</button>
+                            <button type="button" class="aaai-emotion-button" data-emotion="neutral">😐</button>
+                            <button type="button" class="aaai-emotion-button" data-emotion="sad">😞</button>
+                        </div>
+                    </div>
+                    <div class="aaai-rating-section">
+                        <p><?php _e('Rate your experience:', 'aaai-ai-writing-tool'); ?></p>
+                        <div class="aaai-star-rating">
+                            <span class="aaai-star" data-rating="1">★</span>
+                            <span class="aaai-star" data-rating="2">★</span>
+                            <span class="aaai-star" data-rating="3">★</span>
+                            <span class="aaai-star" data-rating="4">★</span>
+                            <span class="aaai-star" data-rating="5">★</span>
+                        </div>
+                    </div>
+                    <div class="aaai-feedback-text-section">
+                        <label for="feedback-text"><?php _e('Additional feedback (optional):', 'aaai-ai-writing-tool'); ?></label>
+                        <textarea id="feedback-text" placeholder="<?php _e('Tell us more about your experience...', 'aaai-ai-writing-tool'); ?>"></textarea>
+                    </div>
+                </div>
+                <div class="aaai-modal-footer">
+                    <button type="button" class="aaai-submit-feedback" onclick="submitFeedback()">
+                        <?php _e('Submit Feedback', 'aaai-ai-writing-tool'); ?>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

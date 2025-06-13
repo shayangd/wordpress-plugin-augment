@@ -36,6 +36,12 @@ class AI_Outline_Generator {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('wp_ajax_generate_outline', array($this, 'ajax_generate_outline'));
         add_action('wp_ajax_nopriv_generate_outline', array($this, 'ajax_generate_outline'));
+
+        // Add AJAX handlers for Figma design
+        add_action('wp_ajax_aaai_generate_content', array($this, 'ajax_generate_content'));
+        add_action('wp_ajax_nopriv_aaai_generate_content', array($this, 'ajax_generate_content'));
+        add_action('wp_ajax_aaai_submit_feedback', array($this, 'ajax_submit_feedback'));
+        add_action('wp_ajax_nopriv_aaai_submit_feedback', array($this, 'ajax_submit_feedback'));
         
         // Register shortcode
         add_shortcode('ai_outline_generator', array($this, 'shortcode_display'));
@@ -209,6 +215,274 @@ class AI_Outline_Generator {
         return ob_get_clean();
     }
     
+    /**
+     * AJAX handler for Figma design content generation
+     */
+    public function ajax_generate_content() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'aaai_ai_writing_nonce')) {
+            wp_send_json_error(__('Security check failed', 'aaai-ai-writing-tool'));
+        }
+
+        $topic = sanitize_textarea_field($_POST['topic']);
+        $keyword = sanitize_text_field($_POST['keyword']);
+        $wordcount = intval($_POST['wordcount']);
+        $tone = sanitize_text_field($_POST['tone']);
+        $llm = sanitize_text_field($_POST['llm']);
+        $content_type = sanitize_text_field($_POST['content_type']);
+
+        // Validate input
+        if (empty($topic) || strlen($topic) > 500) {
+            wp_send_json_error(__('Please enter a valid topic (max 500 characters)', 'aaai-ai-writing-tool'));
+        }
+
+        if ($wordcount < 50 || $wordcount > 5000) {
+            wp_send_json_error(__('Word count must be between 50 and 5000', 'aaai-ai-writing-tool'));
+        }
+
+        // Generate content using AI
+        $content = $this->generate_ai_content($topic, $keyword, $wordcount, $tone, $llm, $content_type);
+
+        if ($content) {
+            wp_send_json_success(array('content' => $content));
+        } else {
+            wp_send_json_error(__('Failed to generate content. Please check your API settings.', 'aaai-ai-writing-tool'));
+        }
+    }
+
+    /**
+     * AJAX handler for feedback submission
+     */
+    public function ajax_submit_feedback() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'aaai_ai_writing_nonce')) {
+            wp_send_json_error(__('Security check failed', 'aaai-ai-writing-tool'));
+        }
+
+        $emotion = sanitize_text_field($_POST['emotion']);
+        $rating = intval($_POST['rating']);
+        $feedback_text = sanitize_textarea_field($_POST['feedback_text']);
+
+        // Log feedback (you can extend this to save to database)
+        error_log("AAAI Feedback - Emotion: {$emotion}, Rating: {$rating}, Text: {$feedback_text}");
+
+        wp_send_json_success(array('message' => __('Thank you for your feedback!', 'aaai-ai-writing-tool')));
+    }
+
+    /**
+     * Generate AI content for Figma design
+     */
+    private function generate_ai_content($topic, $keyword, $wordcount, $tone, $llm, $content_type) {
+        $api_key = get_option('ai_outline_generator_api_key');
+        $api_provider = get_option('ai_outline_generator_api_provider', 'openai');
+
+        // If no API key is configured, return demo content
+        if (empty($api_key)) {
+            return $this->generate_demo_content($topic, $keyword, $wordcount, $tone, $content_type);
+        }
+
+        // Create prompt based on content type
+        $prompt = $this->create_content_prompt($topic, $keyword, $wordcount, $tone, $content_type);
+
+        // Call AI API based on provider
+        switch ($api_provider) {
+            case 'openai':
+                return $this->call_openai_content_api($prompt, $api_key, $wordcount);
+            case 'anthropic':
+                return $this->call_anthropic_api($prompt, $api_key, $wordcount);
+            default:
+                return $this->generate_demo_content($topic, $keyword, $wordcount, $tone, $content_type);
+        }
+    }
+
+    /**
+     * Generate demo content when API is not configured
+     */
+    private function generate_demo_content($topic, $keyword, $wordcount, $tone, $content_type) {
+        $content_types = array(
+            'blog_post' => 'Blog Post',
+            'ad' => 'Advertisement',
+            'social_media_post' => 'Social Media Post',
+            'paragraph' => 'Paragraph',
+            'email' => 'Email',
+            'blog_introduction' => 'Blog Introduction',
+            'blog_outline' => 'Blog Outline',
+            'product_description' => 'Product Description'
+        );
+
+        $type_name = $content_types[$content_type] ?? 'Content';
+
+        $demo_content = "<h2>Demo {$type_name}: {$topic}</h2>";
+
+        if (!empty($keyword)) {
+            $demo_content .= "<p><strong>Focus Keyword:</strong> {$keyword}</p>";
+        }
+
+        $demo_content .= "<p><strong>Tone:</strong> " . ucfirst($tone) . "</p>";
+        $demo_content .= "<p><strong>Target Word Count:</strong> {$wordcount} words</p>";
+
+        $demo_content .= "<h3>Sample Content</h3>";
+        $demo_content .= "<p>This is a demo version of the AI Writing Tool. To generate real AI content, please configure your API key in the WordPress admin panel.</p>";
+
+        switch ($content_type) {
+            case 'blog_post':
+                $demo_content .= "<p>This would be a comprehensive blog post about <strong>{$topic}</strong> written in a {$tone} tone. The content would be approximately {$wordcount} words and would include:</p>";
+                $demo_content .= "<ul><li>An engaging introduction</li><li>Well-structured main points</li><li>Supporting details and examples</li><li>A compelling conclusion</li></ul>";
+                break;
+
+            case 'ad':
+                $demo_content .= "<p>This would be persuasive advertisement copy for <strong>{$topic}</strong> with a {$tone} tone, designed to drive action and engagement.</p>";
+                $demo_content .= "<p><strong>Call to Action:</strong> Learn more about {$topic} today!</p>";
+                break;
+
+            case 'social_media_post':
+                $demo_content .= "<p>This would be an engaging social media post about <strong>{$topic}</strong> optimized for sharing and engagement.</p>";
+                $demo_content .= "<p>📱 Perfect for platforms like Facebook, Twitter, LinkedIn, and Instagram!</p>";
+                break;
+
+            case 'email':
+                $demo_content .= "<p><strong>Subject Line:</strong> Important information about {$topic}</p>";
+                $demo_content .= "<p>This would be a professional email about <strong>{$topic}</strong> written in a {$tone} tone.</p>";
+                break;
+
+            default:
+                $demo_content .= "<p>This would be high-quality content about <strong>{$topic}</strong> tailored to your specific requirements.</p>";
+                break;
+        }
+
+        $demo_content .= "<hr><p><em>To generate real AI content, please configure your OpenAI or Anthropic API key in the plugin settings.</em></p>";
+
+        return $demo_content;
+    }
+
+    /**
+     * Create content prompt based on type
+     */
+    private function create_content_prompt($topic, $keyword, $wordcount, $tone, $content_type) {
+        $content_types = array(
+            'blog_post' => 'blog post',
+            'ad' => 'advertisement copy',
+            'social_media_post' => 'social media post',
+            'paragraph' => 'paragraph',
+            'email' => 'email',
+            'blog_introduction' => 'blog introduction',
+            'blog_outline' => 'blog outline',
+            'product_description' => 'product description'
+        );
+
+        $type_name = $content_types[$content_type] ?? 'content';
+
+        $prompt = "Write a {$tone} {$type_name} about '{$topic}'";
+
+        if (!empty($keyword)) {
+            $prompt .= " focusing on the keyword '{$keyword}'";
+        }
+
+        $prompt .= ". The content should be approximately {$wordcount} words.";
+
+        // Add specific instructions based on content type
+        switch ($content_type) {
+            case 'blog_post':
+                $prompt .= " Include an engaging introduction, well-structured body paragraphs, and a compelling conclusion.";
+                break;
+            case 'ad':
+                $prompt .= " Make it persuasive and action-oriented with a clear call-to-action.";
+                break;
+            case 'social_media_post':
+                $prompt .= " Make it engaging and shareable, suitable for social media platforms.";
+                break;
+            case 'email':
+                $prompt .= " Include a subject line and format it as a professional email.";
+                break;
+            case 'blog_introduction':
+                $prompt .= " Focus on creating a compelling hook that draws readers in.";
+                break;
+            case 'blog_outline':
+                $prompt .= " Provide a structured outline with main points and subpoints.";
+                break;
+            case 'product_description':
+                $prompt .= " Highlight key features, benefits, and include persuasive selling points.";
+                break;
+        }
+
+        return $prompt;
+    }
+
+    /**
+     * Call OpenAI API for content generation
+     */
+    private function call_openai_content_api($prompt, $api_key, $wordcount) {
+        $url = 'https://api.openai.com/v1/chat/completions';
+
+        // Adjust max_tokens based on word count (roughly 1.3 tokens per word)
+        $max_tokens = min(4000, intval($wordcount * 1.5));
+
+        $data = array(
+            'model' => 'gpt-3.5-turbo',
+            'messages' => array(
+                array(
+                    'role' => 'system',
+                    'content' => 'You are a professional content writer. Create high-quality, engaging content that matches the requested tone and style. Format the output with proper HTML tags for readability.'
+                ),
+                array(
+                    'role' => 'user',
+                    'content' => $prompt
+                )
+            ),
+            'max_tokens' => $max_tokens,
+            'temperature' => 0.7
+        );
+
+        $args = array(
+            'headers' => array(
+                'Authorization' => 'Bearer ' . $api_key,
+                'Content-Type' => 'application/json'
+            ),
+            'body' => json_encode($data),
+            'timeout' => 60
+        );
+
+        $response = wp_remote_post($url, $args);
+
+        if (is_wp_error($response)) {
+            error_log('AAAI AI Writing Tool - API Error: ' . $response->get_error_message());
+            return false;
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        if ($response_code !== 200) {
+            error_log('AAAI AI Writing Tool - API Response Code: ' . $response_code);
+            return false;
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log('AAAI AI Writing Tool - JSON Decode Error: ' . json_last_error_msg());
+            return false;
+        }
+
+        if (isset($data['choices'][0]['message']['content'])) {
+            return $data['choices'][0]['message']['content'];
+        }
+
+        if (isset($data['error'])) {
+            error_log('AAAI AI Writing Tool - OpenAI Error: ' . $data['error']['message']);
+        }
+
+        return false;
+    }
+
+    /**
+     * Call Anthropic Claude API for content generation
+     */
+    private function call_anthropic_api($prompt, $api_key, $wordcount) {
+        // Placeholder for Anthropic API integration
+        // You can implement this if you have Claude API access
+        return "This is a sample generated content for: " . $prompt . " (Anthropic API not implemented yet)";
+    }
+
     /**
      * AJAX handler for outline generation
      */

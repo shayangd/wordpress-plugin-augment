@@ -321,6 +321,230 @@
     $("#keyword").attr("placeholder", typeData.keyword);
   }
 
+  /**
+   * Generate content via AJAX
+   */
+  function generateContent() {
+    console.log("Generate content called");
+
+    if (isGenerating) {
+      console.log("Already generating, returning");
+      return;
+    }
+
+    // Validate required fields
+    const topic = $("#topic").val().trim();
+    const tone = $("#tone").val();
+
+    if (!topic) {
+      showNotification("Please enter a topic", "error");
+      return;
+    }
+
+    if (!tone) {
+      showNotification("Please select a tone", "error");
+      return;
+    }
+
+    isGenerating = true;
+    const $generateBtn = $("#aaai-generate-btn");
+    const $buttonText = $generateBtn.find(".aaai-button-text");
+
+    // Update button state
+    $generateBtn.addClass("loading");
+    $buttonText.text(aaai_ajax.generating_text);
+
+    // Collect form data
+    const formData = {
+      action: "aaai_generate_content",
+      nonce: aaai_ajax.nonce,
+      topic: topic,
+      keyword: $("#keyword").val().trim(),
+      wordcount: $("#wordcount").val() || "1000",
+      tone: tone,
+      llm: $("#llm").val() || "openai",
+      content_type: currentContentType,
+    };
+
+    console.log("Form data:", formData);
+
+    // Make AJAX request
+    $.ajax({
+      url: aaai_ajax.ajax_url,
+      type: "POST",
+      data: formData,
+      timeout: 60000,
+      success: function (response) {
+        console.log("AJAX success:", response);
+        if (response.success) {
+          displayResults(response.data.content);
+          showNotification("Content generated successfully!", "success");
+        } else {
+          showNotification(response.data || aaai_ajax.error_text, "error");
+        }
+      },
+      error: function (xhr, status, error) {
+        console.log("AJAX error:", status, error);
+        if (status === "timeout") {
+          showNotification(aaai_ajax.timeout_error, "error");
+        } else {
+          showNotification(aaai_ajax.network_error, "error");
+        }
+      },
+      complete: function () {
+        isGenerating = false;
+        $generateBtn.removeClass("loading");
+        $buttonText.text(aaai_ajax.generate_text);
+      },
+    });
+  }
+
+  /**
+   * Display generated results
+   */
+  function displayResults(content) {
+    const $resultsSection = $("#aaai-results-section");
+    const $contentArea = $("#aaai-generated-content");
+
+    $contentArea.html(content);
+    $resultsSection.show();
+
+    // Scroll to results
+    $("html, body").animate(
+      {
+        scrollTop: $resultsSection.offset().top - 100,
+      },
+      500
+    );
+  }
+
+  /**
+   * Copy content to clipboard
+   */
+  function copyToClipboard() {
+    const content = $("#aaai-generated-content").text();
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(content).then(function () {
+        showNotification(aaai_ajax.copy_success, "success");
+      });
+    } else {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = content;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      showNotification(aaai_ajax.copy_success, "success");
+    }
+  }
+
+  /**
+   * Show feedback modal
+   */
+  function showFeedbackModal() {
+    $("#aaai-feedback-modal").fadeIn(300);
+  }
+
+  /**
+   * Hide feedback modal
+   */
+  function hideFeedbackModal() {
+    $("#aaai-feedback-modal").fadeOut(300);
+    resetFeedbackForm();
+  }
+
+  /**
+   * Reset feedback form
+   */
+  function resetFeedbackForm() {
+    $(".aaai-emotion-button").removeClass("active");
+    selectedEmotion = null;
+    selectedRating = 0;
+    updateStarRating(0);
+    $("#feedback-text").val("");
+  }
+
+  /**
+   * Update star rating display
+   */
+  function updateStarRating(rating) {
+    $(".aaai-star").each(function (index) {
+      if (index < rating) {
+        $(this).addClass("active");
+      } else {
+        $(this).removeClass("active");
+      }
+    });
+  }
+
+  /**
+   * Highlight stars on hover
+   */
+  function highlightStars(rating) {
+    $(".aaai-star").each(function (index) {
+      if (index < rating) {
+        $(this).addClass("hover");
+      } else {
+        $(this).removeClass("hover");
+      }
+    });
+  }
+
+  /**
+   * Submit feedback
+   */
+  function submitFeedback() {
+    const feedbackData = {
+      action: "aaai_submit_feedback",
+      nonce: aaai_ajax.nonce,
+      emotion: selectedEmotion,
+      rating: selectedRating,
+      feedback_text: $("#feedback-text").val(),
+    };
+
+    $.ajax({
+      url: aaai_ajax.ajax_url,
+      type: "POST",
+      data: feedbackData,
+      success: function (response) {
+        if (response.success) {
+          showNotification(aaai_ajax.feedback_success, "success");
+          hideFeedbackModal();
+        } else {
+          showNotification(response.data || aaai_ajax.error_text, "error");
+        }
+      },
+      error: function () {
+        showNotification(aaai_ajax.network_error, "error");
+      },
+    });
+  }
+
+  /**
+   * Show notification
+   */
+  function showNotification(message, type = "info") {
+    // Create notification element if it doesn't exist
+    let $notification = $(".aaai-notification");
+    if ($notification.length === 0) {
+      $notification = $('<div class="aaai-notification"></div>');
+      $("body").append($notification);
+    }
+
+    $notification
+      .removeClass("success error info")
+      .addClass(type)
+      .text(message)
+      .fadeIn(300);
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      $notification.fadeOut(300);
+    }, 3000);
+  }
+
   // Export functions for external use if needed
   window.aaaiWritingTool = {
     generateContent: generateContent,
