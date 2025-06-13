@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin Name: AI Outline Generator
+ * Plugin Name: AAAI AI Writing Tool
  * Plugin URI: https://github.com/shayangd/wordpress-plugin-augment
- * Description: A WordPress plugin that generates AI-powered outlines for various content types. Based on Wellows + AAAI Design.
+ * Description: A comprehensive AI-powered writing tool that generates various content types including blog posts, ads, emails, and social media content. Based on AAAI Design specifications with Figma UI.
  * Version: 1.0.0
  * Author: Shayan Rais
  * Author URI: https://github.com/shayangd
  * License: GPL v2 or later
- * Text Domain: ai-outline-generator
+ * Text Domain: aaai-ai-writing-tool
  * Domain Path: /languages
  */
 
@@ -56,27 +56,64 @@ class AI_Outline_Generator {
      * Enqueue frontend scripts and styles
      */
     public function enqueue_scripts() {
+        // Enqueue Google Fonts for Figma design
         wp_enqueue_style(
-            'ai-outline-generator-style',
-            AI_OUTLINE_GENERATOR_PLUGIN_URL . 'assets/css/style.css',
+            'aaai-google-fonts',
+            'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Montserrat:wght@400;500;600&display=swap',
+            array(),
+            null
+        );
+
+        // Enqueue Figma-based CSS
+        wp_enqueue_style(
+            'aaai-ai-writing-tool-figma-style',
+            AI_OUTLINE_GENERATOR_PLUGIN_URL . 'assets/css/figma-style.css',
             array(),
             AI_OUTLINE_GENERATOR_VERSION
         );
-        
+
+        // Fallback to original CSS if Figma CSS doesn't exist
+        if (!file_exists(AI_OUTLINE_GENERATOR_PLUGIN_PATH . 'assets/css/figma-style.css')) {
+            wp_enqueue_style(
+                'ai-outline-generator-style',
+                AI_OUTLINE_GENERATOR_PLUGIN_URL . 'assets/css/style.css',
+                array(),
+                AI_OUTLINE_GENERATOR_VERSION
+            );
+        }
+
+        // Enqueue Figma-based JavaScript
         wp_enqueue_script(
-            'ai-outline-generator-script',
-            AI_OUTLINE_GENERATOR_PLUGIN_URL . 'assets/js/script.js',
+            'aaai-ai-writing-tool-figma-script',
+            AI_OUTLINE_GENERATOR_PLUGIN_URL . 'assets/js/figma-script.js',
             array('jquery'),
             AI_OUTLINE_GENERATOR_VERSION,
             true
         );
-        
-        // Localize script for AJAX
-        wp_localize_script('ai-outline-generator-script', 'ai_outline_ajax', array(
+
+        // Fallback to original JS if Figma JS doesn't exist
+        if (!file_exists(AI_OUTLINE_GENERATOR_PLUGIN_PATH . 'assets/js/figma-script.js')) {
+            wp_enqueue_script(
+                'ai-outline-generator-script',
+                AI_OUTLINE_GENERATOR_PLUGIN_URL . 'assets/js/script.js',
+                array('jquery'),
+                AI_OUTLINE_GENERATOR_VERSION,
+                true
+            );
+        }
+
+        // Localize script for AJAX - Updated for Figma design
+        wp_localize_script('aaai-ai-writing-tool-figma-script', 'aaai_ajax', array(
             'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('ai_outline_nonce'),
-            'generating_text' => __('Generating outline...', 'ai-outline-generator'),
-            'error_text' => __('Error generating outline. Please try again.', 'ai-outline-generator')
+            'nonce' => wp_create_nonce('aaai_ai_writing_nonce'),
+            'generating_text' => __('Generating...', 'aaai-ai-writing-tool'),
+            'generate_text' => __('Generate Text', 'aaai-ai-writing-tool'),
+            'error_text' => __('Error generating content. Please try again.', 'aaai-ai-writing-tool'),
+            'copy_success' => __('Content copied to clipboard!', 'aaai-ai-writing-tool'),
+            'feedback_success' => __('Thank you for your feedback!', 'aaai-ai-writing-tool'),
+            'network_error' => __('Network error. Please check your connection and try again.', 'aaai-ai-writing-tool'),
+            'timeout_error' => __('Request timed out. Please try again.', 'aaai-ai-writing-tool'),
+            'validation_error' => __('Please fill in all required fields.', 'aaai-ai-writing-tool')
         ));
     }
     
@@ -149,12 +186,26 @@ class AI_Outline_Generator {
      */
     public function shortcode_display($atts) {
         $atts = shortcode_atts(array(
-            'show_samples' => 'true',
-            'max_chars' => '1000'
+            'show_creative_potions' => 'true',
+            'default_wordcount' => '1000',
+            'default_tone' => 'professional',
+            'template' => 'figma' // Use Figma template by default
         ), $atts);
-        
+
         ob_start();
-        include AI_OUTLINE_GENERATOR_PLUGIN_PATH . 'templates/frontend-form.php';
+
+        // Use Figma template if it exists, otherwise fallback to original
+        $figma_template = AI_OUTLINE_GENERATOR_PLUGIN_PATH . 'templates/frontend-form-figma.php';
+        $original_template = AI_OUTLINE_GENERATOR_PLUGIN_PATH . 'templates/frontend-form.php';
+
+        if ($atts['template'] === 'figma' && file_exists($figma_template)) {
+            include $figma_template;
+        } elseif (file_exists($original_template)) {
+            include $original_template;
+        } else {
+            echo '<div class="aaai-error">Template not found. Please check plugin installation.</div>';
+        }
+
         return ob_get_clean();
     }
     

@@ -1,174 +1,263 @@
 <?php
+/**
+ * Frontend form template for AAAI AI Writing Tool
+ * Based on Figma Design Specifications - Screens 1-4
+ */
+
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
+
+// Get default values from options or shortcode attributes
+$default_wordcount = isset($atts['default_wordcount']) ? $atts['default_wordcount'] : get_option('aaai_ai_writing_tool_default_wordcount', '1000');
+$default_tone = isset($atts['default_tone']) ? $atts['default_tone'] : get_option('aaai_ai_writing_tool_default_tone', 'professional');
+$show_creative_potions = isset($atts['show_creative_potions']) ? $atts['show_creative_potions'] === 'true' : true;
 ?>
 
-<div class="ai-outline-generator-container">
-    <!-- Hero Section -->
-    <div class="ai-outline-hero">
-        <div class="ai-outline-badge-group">
-            <div class="ai-outline-badge">
-                <span class="badge-text"><?php _e('AI Outline Generator', 'ai-outline-generator'); ?></span>
+<div class="aaai-ai-writing-tool">
+    <!-- Background Image -->
+    <div class="aaai-content-background">
+        <div class="aaai-background-image"></div>
+    </div>
+
+    <!-- Navigation Bar (Optional - can be hidden via CSS) -->
+    <div class="aaai-navigation-bar" style="display: none;">
+        <div class="aaai-nav-container">
+            <div class="aaai-logo"></div>
+            <div class="aaai-nav-items">
+                <span>Browse all Categories</span>
+                <span class="active">Best AI Tools</span>
+                <span>Reviews</span>
+                <span>Comparisons</span>
+                <span>Guides</span>
+                <span>News</span>
+                <span>Submit your tool</span>
             </div>
-            <div class="ai-outline-message">
-                <?php _e('Turn Thoughts Into Text, Effortlessly.', 'ai-outline-generator'); ?>
+            <div class="aaai-region-search">
+                <div class="aaai-flag-icon"></div>
+                <div class="aaai-search-icon"></div>
             </div>
         </div>
-        
-        <h1 class="ai-outline-title">
-            <?php _e('Free AI Outline Generator', 'ai-outline-generator'); ?>
-        </h1>
-        
-        <p class="ai-outline-description">
-            <?php _e('Jumpstart your writing with structured, ready-to-go outlines. Whether it\'s a blog post, essay, article, or video script — our AI helps you organize ideas fast, so you can focus on creating, not stressing.', 'ai-outline-generator'); ?>
-        </p>
     </div>
-    
-    <!-- Main Form Section -->
-    <div class="ai-outline-form-container">
-        <form id="ai-outline-form" class="ai-outline-form">
-            <div class="form-header">
-                <h2><?php _e('Create Your Outline', 'ai-outline-generator'); ?></h2>
+
+    <div class="aaai-container">
+        <!-- Badge Group - Figma Screen 1 Design -->
+        <div class="aaai-badge-group">
+            <div class="aaai-badge-frame">
+                <div class="aaai-badge">
+                    <div class="aaai-badge-base">
+                        <span class="aaai-badge-text"><?php _e('AI Writing tool', 'aaai-ai-writing-tool'); ?></span>
+                    </div>
+                </div>
+                <div class="aaai-badge-message"><?php _e('Turn Thoughts Into Text, Effortlessly.', 'aaai-ai-writing-tool'); ?></div>
             </div>
-            
-            <div class="form-content">
-                <!-- Text Input Area -->
-                <div class="input-group">
-                    <textarea 
-                        id="outline-content" 
-                        name="content" 
-                        placeholder="<?php _e('Describe your topic or paste your content here...', 'ai-outline-generator'); ?>"
-                        maxlength="<?php echo esc_attr($atts['max_chars']); ?>"
+        </div>
+
+        <!-- Heading Section - Figma Design -->
+        <div class="aaai-heading-section">
+            <h1 class="aaai-main-heading"><?php _e('Free AI Writing Tool', 'aaai-ai-writing-tool'); ?></h1>
+            <p class="aaai-supporting-text">
+                <?php _e('Effortlessly turn your thoughts into clear, compelling copy from emails to articles in seconds. Write like a pro, for Free!', 'aaai-ai-writing-tool'); ?>
+            </p>
+        </div>
+    <!-- Form Container -->
+    <div class="aaai-form-container">
+        <form id="aaai-ai-writing-form" method="post">
+            <?php wp_nonce_field('aaai_ai_writing_nonce', 'aaai_ai_writing_nonce'); ?>
+
+            <div class="aaai-form-grid">
+                <!-- Topic Field -->
+                <div class="aaai-form-field">
+                    <label for="topic" class="aaai-form-label"><?php _e('Topic', 'aaai-ai-writing-tool'); ?></label>
+                    <textarea
+                        id="topic"
+                        name="topic"
+                        class="aaai-form-textarea"
+                        placeholder="<?php _e('Enter your topic or main idea here...', 'aaai-ai-writing-tool'); ?>"
+                        rows="3"
                         required
                     ></textarea>
-                    <div class="char-counter">
-                        <span id="char-count">0</span>/<span id="char-limit"><?php echo esc_attr($atts['max_chars']); ?></span>
+                </div>
+
+                <!-- Keyword Field -->
+                <div class="aaai-form-field">
+                    <label for="keyword" class="aaai-form-label"><?php _e('Keyword', 'aaai-ai-writing-tool'); ?></label>
+                    <input
+                        type="text"
+                        id="keyword"
+                        name="keyword"
+                        class="aaai-form-input"
+                        placeholder="<?php _e('Enter focus keyword (optional)', 'aaai-ai-writing-tool'); ?>"
+                    />
+                </div>
+
+                <!-- Word Count Field -->
+                <div class="aaai-form-field">
+                    <label for="wordcount" class="aaai-form-label"><?php _e('Wordcount', 'aaai-ai-writing-tool'); ?></label>
+                    <div class="aaai-number-input-container">
+                        <input
+                            type="number"
+                            id="wordcount"
+                            name="wordcount"
+                            class="aaai-form-input"
+                            value="<?php echo esc_attr($default_wordcount); ?>"
+                            min="50"
+                            max="5000"
+                            step="50"
+                            required
+                        />
+                        <div class="aaai-number-controls">
+                            <button type="button" class="aaai-number-control increment">▲</button>
+                            <button type="button" class="aaai-number-control decrement">▼</button>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- Form Controls -->
-                <div class="form-controls">
-                    <div class="control-group">
-                        <label for="content-type"><?php _e('Outline/Content Type', 'ai-outline-generator'); ?></label>
-                        <select id="content-type" name="content_type" required>
-                            <option value="research-paper"><?php _e('Research Paper', 'ai-outline-generator'); ?></option>
-                            <option value="blog-post"><?php _e('Blog Post', 'ai-outline-generator'); ?></option>
-                            <option value="essay"><?php _e('Essay', 'ai-outline-generator'); ?></option>
-                            <option value="article"><?php _e('Article', 'ai-outline-generator'); ?></option>
-                            <option value="video-script"><?php _e('Video Script', 'ai-outline-generator'); ?></option>
-                            <option value="presentation"><?php _e('Presentation', 'ai-outline-generator'); ?></option>
-                            <option value="book-chapter"><?php _e('Book Chapter', 'ai-outline-generator'); ?></option>
-                        </select>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label for="sections"><?php _e('Outline Sections', 'ai-outline-generator'); ?></label>
-                        <select id="sections" name="sections" required>
-                            <option value="3"><?php _e('3 Sections', 'ai-outline-generator'); ?></option>
-                            <option value="4"><?php _e('4 Sections', 'ai-outline-generator'); ?></option>
-                            <option value="5"><?php _e('5 Sections', 'ai-outline-generator'); ?></option>
-                            <option value="6"><?php _e('6 Sections', 'ai-outline-generator'); ?></option>
-                            <option value="7"><?php _e('7 Sections', 'ai-outline-generator'); ?></option>
-                        </select>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label for="language"><?php _e('Language', 'ai-outline-generator'); ?></label>
-                        <select id="language" name="language" required>
-                            <option value="English"><?php _e('English', 'ai-outline-generator'); ?></option>
-                            <option value="Spanish"><?php _e('Spanish', 'ai-outline-generator'); ?></option>
-                            <option value="French"><?php _e('French', 'ai-outline-generator'); ?></option>
-                            <option value="German"><?php _e('German', 'ai-outline-generator'); ?></option>
-                            <option value="Italian"><?php _e('Italian', 'ai-outline-generator'); ?></option>
-                            <option value="Portuguese"><?php _e('Portuguese', 'ai-outline-generator'); ?></option>
-                            <option value="Chinese"><?php _e('Chinese', 'ai-outline-generator'); ?></option>
-                            <option value="Japanese"><?php _e('Japanese', 'ai-outline-generator'); ?></option>
-                        </select>
-                    </div>
+
+                <!-- Tone Field -->
+                <div class="aaai-form-field">
+                    <label for="tone" class="aaai-form-label"><?php _e('Tone', 'aaai-ai-writing-tool'); ?></label>
+                    <select id="tone" name="tone" class="aaai-form-select" required>
+                        <option value="professional" <?php selected($default_tone, 'professional'); ?>><?php _e('Professional', 'aaai-ai-writing-tool'); ?></option>
+                        <option value="casual" <?php selected($default_tone, 'casual'); ?>><?php _e('Casual', 'aaai-ai-writing-tool'); ?></option>
+                        <option value="friendly" <?php selected($default_tone, 'friendly'); ?>><?php _e('Friendly', 'aaai-ai-writing-tool'); ?></option>
+                        <option value="formal" <?php selected($default_tone, 'formal'); ?>><?php _e('Formal', 'aaai-ai-writing-tool'); ?></option>
+                        <option value="conversational" <?php selected($default_tone, 'conversational'); ?>><?php _e('Conversational', 'aaai-ai-writing-tool'); ?></option>
+                        <option value="persuasive" <?php selected($default_tone, 'persuasive'); ?>><?php _e('Persuasive', 'aaai-ai-writing-tool'); ?></option>
+                        <option value="informative" <?php selected($default_tone, 'informative'); ?>><?php _e('Informative', 'aaai-ai-writing-tool'); ?></option>
+                    </select>
                 </div>
-                
-                <!-- Generate Button -->
-                <div class="button-container">
-                    <button type="submit" id="generate-btn" class="generate-button">
-                        <svg class="button-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M8 1V15M1 8H15" stroke="currentColor" stroke-width="1.17" stroke-linecap="round"/>
-                        </svg>
-                        <span class="button-text"><?php _e('Generate Outline', 'ai-outline-generator'); ?></span>
-                    </button>
+
+                <!-- LLM Field -->
+                <div class="aaai-form-field">
+                    <label for="llm" class="aaai-form-label"><?php _e('LLM', 'aaai-ai-writing-tool'); ?></label>
+                    <select id="llm" name="llm" class="aaai-form-select" required>
+                        <option value="claude"><?php _e('Claude', 'aaai-ai-writing-tool'); ?></option>
+                        <option value="gpt-4"><?php _e('GPT-4', 'aaai-ai-writing-tool'); ?></option>
+                        <option value="gpt-3.5"><?php _e('GPT-3.5', 'aaai-ai-writing-tool'); ?></option>
+                    </select>
                 </div>
             </div>
+
+            <!-- Hidden Content Type Field -->
+            <input type="hidden" id="content-type" name="content_type" value="blog_post" />
+
+            <!-- Generate Button -->
+            <button type="submit" class="aaai-generate-button">
+                <?php _e('Generate Text', 'aaai-ai-writing-tool'); ?>
+            </button>
         </form>
-        
-        <!-- Loading State -->
-        <div id="loading-state" class="loading-state" style="display: none;">
-            <div class="loading-spinner"></div>
-            <p><?php _e('Generating your outline...', 'ai-outline-generator'); ?></p>
+    </div>
+    <!-- Creative Potions Section -->
+    <div class="aaai-creative-potions">
+        <h2 class="aaai-potions-title"><?php _e('Creative Potions', 'aaai-ai-writing-tool'); ?></h2>
+        <div class="aaai-potions-grid">
+            <div class="aaai-potion-card" data-type="blog_post">
+                <div class="aaai-potion-icon"></div>
+                <div class="aaai-potion-title"><?php _e('Blog Post', 'aaai-ai-writing-tool'); ?></div>
+                <div class="aaai-potion-description"><?php _e('Create engaging blog content', 'aaai-ai-writing-tool'); ?></div>
+            </div>
+
+            <div class="aaai-potion-card" data-type="ad">
+                <div class="aaai-potion-icon"></div>
+                <div class="aaai-potion-title"><?php _e('Ad', 'aaai-ai-writing-tool'); ?></div>
+                <div class="aaai-potion-description"><?php _e('Persuasive advertising copy', 'aaai-ai-writing-tool'); ?></div>
+            </div>
+
+            <div class="aaai-potion-card" data-type="social_media_post">
+                <div class="aaai-potion-icon"></div>
+                <div class="aaai-potion-title"><?php _e('Social Media Post', 'aaai-ai-writing-tool'); ?></div>
+                <div class="aaai-potion-description"><?php _e('Engaging social content', 'aaai-ai-writing-tool'); ?></div>
+            </div>
+
+            <div class="aaai-potion-card" data-type="paragraph">
+                <div class="aaai-potion-icon"></div>
+                <div class="aaai-potion-title"><?php _e('Paragraph', 'aaai-ai-writing-tool'); ?></div>
+                <div class="aaai-potion-description"><?php _e('Well-structured paragraphs', 'aaai-ai-writing-tool'); ?></div>
+            </div>
+
+            <div class="aaai-potion-card" data-type="email">
+                <div class="aaai-potion-icon"></div>
+                <div class="aaai-potion-title"><?php _e('Email', 'aaai-ai-writing-tool'); ?></div>
+                <div class="aaai-potion-description"><?php _e('Professional email content', 'aaai-ai-writing-tool'); ?></div>
+            </div>
+
+            <div class="aaai-potion-card" data-type="blog_introduction">
+                <div class="aaai-potion-icon"></div>
+                <div class="aaai-potion-title"><?php _e('Blog Introduction', 'aaai-ai-writing-tool'); ?></div>
+                <div class="aaai-potion-description"><?php _e('Compelling blog intros', 'aaai-ai-writing-tool'); ?></div>
+            </div>
+
+            <div class="aaai-potion-card" data-type="blog_outline">
+                <div class="aaai-potion-icon"></div>
+                <div class="aaai-potion-title"><?php _e('Blog Outline', 'aaai-ai-writing-tool'); ?></div>
+                <div class="aaai-potion-description"><?php _e('Structured blog outlines', 'aaai-ai-writing-tool'); ?></div>
+            </div>
+
+            <div class="aaai-potion-card" data-type="product_description">
+                <div class="aaai-potion-icon"></div>
+                <div class="aaai-potion-title"><?php _e('Product Description', 'aaai-ai-writing-tool'); ?></div>
+                <div class="aaai-potion-description"><?php _e('Compelling product copy', 'aaai-ai-writing-tool'); ?></div>
+            </div>
         </div>
-        
-        <!-- Results Section -->
-        <div id="outline-results" class="outline-results" style="display: none;">
-            <div class="results-header">
-                <h3><?php _e('Your Generated Outline', 'ai-outline-generator'); ?></h3>
-                <button type="button" id="copy-outline" class="copy-button">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M4 4V2C4 1.44772 4.44772 1 5 1H14C14.5523 1 15 1.44772 15 2V11C15 11.5523 14.5523 12 14 12H12M4 4H2C1.44772 4 1 4.44772 1 5V14C1 14.5523 1.44772 15 2 15H11C11.5523 15 12 14.5523 12 14V12M4 4V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <?php _e('Copy', 'ai-outline-generator'); ?>
+    </div>
+
+    <!-- Results Section -->
+    <div class="aaai-results-section">
+        <div class="aaai-results-header">
+            <h3 class="aaai-results-title"><?php _e('Generated Content', 'aaai-ai-writing-tool'); ?></h3>
+            <div class="aaai-results-actions">
+                <button class="aaai-action-button aaai-copy-button">
+                    📋 <?php _e('Copy', 'aaai-ai-writing-tool'); ?>
+                </button>
+                <button class="aaai-action-button aaai-regenerate-button">
+                    🔄 <?php _e('Regenerate', 'aaai-ai-writing-tool'); ?>
+                </button>
+                <button class="aaai-action-button aaai-feedback-button">
+                    ⭐ <?php _e('Feedback', 'aaai-ai-writing-tool'); ?>
                 </button>
             </div>
-            <div id="outline-content-result" class="outline-content"></div>
+        </div>
+        <div class="aaai-results-content">
+            <!-- Generated content will be inserted here -->
         </div>
     </div>
-    
-    <?php if ($atts['show_samples'] === 'true'): ?>
-    <!-- Sample Content Cards -->
-    <div class="ai-outline-samples">
-        <div class="sample-card">
-            <h3><?php _e('How to Humanize AI-Generated Text', 'ai-outline-generator'); ?></h3>
-            <div class="sample-content">
-                <p><?php _e('AI can be a great tool for generating content, but the text it produces can sometimes sound robotic. Here\'s a step-by-step guide to humanizing AI-generated text, making it sound more natural and engaging for your readers:', 'ai-outline-generator'); ?></p>
-                <div class="sample-steps">
-                    <div class="step"><?php _e('Step 1. Talk Like a Human:', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 2. Show, Don\'t Tell:', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 3. Rewrite passive voice to Active voice:', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 4. Fact-Check for Accuracy', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 5. Don\'t Forget to Add Visuals', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 6. Take the Help of AI tools', 'ai-outline-generator'); ?></div>
-                </div>
+    <!-- Feedback Modal -->
+    <div class="aaai-feedback-modal">
+        <div class="aaai-feedback-content">
+            <h3 class="aaai-feedback-title"><?php _e('How was the generated content?', 'aaai-ai-writing-tool'); ?></h3>
+
+            <div class="aaai-emotion-selector">
+                <button class="aaai-emotion-button" data-emotion="love">😍</button>
+                <button class="aaai-emotion-button" data-emotion="like">😊</button>
+                <button class="aaai-emotion-button" data-emotion="neutral">😐</button>
+                <button class="aaai-emotion-button" data-emotion="dislike">😞</button>
+                <button class="aaai-emotion-button" data-emotion="hate">😡</button>
             </div>
-        </div>
-        
-        <div class="sample-card">
-            <h3><?php _e('Content Marketing Strategy Guide', 'ai-outline-generator'); ?></h3>
-            <div class="sample-content">
-                <p><?php _e('Build a comprehensive content marketing strategy that drives engagement and converts visitors into customers with this structured approach:', 'ai-outline-generator'); ?></p>
-                <div class="sample-steps">
-                    <div class="step"><?php _e('Step 1. Define Your Target Audience', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 2. Set Clear Content Goals', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 3. Choose Content Types and Formats', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 4. Create a Content Calendar', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 5. Optimize for SEO', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 6. Measure and Analyze Performance', 'ai-outline-generator'); ?></div>
-                </div>
+
+            <div class="aaai-rating-stars">
+                <span class="aaai-star" data-rating="1">⭐</span>
+                <span class="aaai-star" data-rating="2">⭐</span>
+                <span class="aaai-star" data-rating="3">⭐</span>
+                <span class="aaai-star" data-rating="4">⭐</span>
+                <span class="aaai-star" data-rating="5">⭐</span>
             </div>
-        </div>
-        
-        <div class="sample-card">
-            <h3><?php _e('Effective Email Marketing Campaigns', 'ai-outline-generator'); ?></h3>
-            <div class="sample-content">
-                <p><?php _e('Create email marketing campaigns that engage subscribers and drive conversions with these proven strategies and best practices:', 'ai-outline-generator'); ?></p>
-                <div class="sample-steps">
-                    <div class="step"><?php _e('Step 1. Build a Quality Email List', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 2. Craft Compelling Subject Lines', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 3. Design Mobile-Friendly Templates', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 4. Personalize Your Messages', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 5. Test and Optimize', 'ai-outline-generator'); ?></div>
-                    <div class="step"><?php _e('Step 6. Track Key Metrics', 'ai-outline-generator'); ?></div>
-                </div>
+
+            <textarea
+                id="feedback-text"
+                class="aaai-feedback-textarea"
+                placeholder="<?php _e('Tell us more about your experience (optional)', 'aaai-ai-writing-tool'); ?>"
+            ></textarea>
+
+            <div class="aaai-feedback-actions">
+                <button id="submit-feedback" class="aaai-feedback-button primary">
+                    <?php _e('Submit Feedback', 'aaai-ai-writing-tool'); ?>
+                </button>
+                <button id="close-feedback" class="aaai-feedback-button secondary">
+                    <?php _e('Close', 'aaai-ai-writing-tool'); ?>
+                </button>
             </div>
         </div>
     </div>
-    <?php endif; ?>
+    </div> <!-- /.aaai-container -->
 </div>
